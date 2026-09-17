@@ -56,7 +56,7 @@ Controllers.PanelController {
                     id: listView
                     visible: !root.commandEditing
                     width: parent.width
-                    height: visible ? Math.min(Style.space(320), contentHeight) : 0
+                    height: visible ? Math.min(Style.space(480), contentHeight) : 0
                     clip: true
                     interactive: !root.draggedEntry
                     model: root.rows
