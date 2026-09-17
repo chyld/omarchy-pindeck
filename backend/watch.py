@@ -7,6 +7,9 @@ import selectors
 import struct
 import sys
 import time
+# Omarchy watches the plugin tree: bytecode writes would reload the shell.
+# Set this here because isolated Python ignores PYTHONDONTWRITEBYTECODE.
+sys.dont_write_bytecode = True
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from backend.processes import parent_death_signal
 from backend.storage import Store
