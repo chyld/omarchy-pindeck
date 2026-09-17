@@ -16,7 +16,7 @@ Item {
             name: entry.name,
             startupClass: entry.startupClass,
             executable: entry.command && entry.command.length ? String(entry.command[0]).split("/").pop() : "",
-            terminal: entry.kind === "command" || entry.runInTerminal,
+            terminal: entry.kind === "command" ? entry.runInTerminal !== false : entry.runInTerminal,
             newWindow: newWindow === true
         };
         previous = Hyprland.toplevels.values.map(function (t) {

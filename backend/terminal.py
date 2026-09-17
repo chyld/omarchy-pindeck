@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""User-requested terminal command runner; command bytes never enter argv."""
+"""Saved command runner; command bytes never enter argv."""
 import os
 from pathlib import Path
 import subprocess
@@ -27,6 +27,8 @@ def run_command(command):
 
 
 def main():
+    terminal = sys.stdin.isatty()
+    status = 1
     try:
         if len(sys.argv) != 3: raise ValueError('Invalid command request.')
         with Store(os.path.expanduser('~/.config/omarchy')) as store:
@@ -35,12 +37,17 @@ def main():
             data = schema.decode(raw)
             pin = next((p for p in data['pinnedApps'] if p.get('pinId', p['id']) == sys.argv[1]), None)
             if not pin or pin.get('kind') != 'command': raise ValueError('Command no longer exists.')
+        terminal = pin.get('runInTerminal') is not False
         status = run_command(pin['commandText'])
+        if not terminal:
+            return status
         print('\nExit status: %s' % status)
     except Exception:
-        print('Could not run the saved command. It may have changed; try launching it again.')
-    try: input('Press Enter to close…')
-    except EOFError: pass
+        print('Could not run the saved command. It may have changed; try launching it again.', file=sys.stderr)
+    if terminal:
+        try: input('Press Enter to close…')
+        except EOFError: pass
+    return status
 
 
-if __name__ == '__main__': main()
+if __name__ == '__main__': sys.exit(main())

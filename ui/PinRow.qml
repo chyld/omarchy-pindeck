@@ -21,7 +21,8 @@ Rectangle {
     required property int index
     width: list.width
     PinToolTip {
-        visible: panel.opened && mouse.containsMouse && (row.modelData.kind === "location" || row.modelData.kind === "command") && !panel.draggedEntry
+        objectName: "commandToolTip"
+        visible: panel.opened && mouse.containsMouse && !terminalHover.hovered && (row.modelData.kind === "location" || row.modelData.kind === "command") && !panel.draggedEntry
         text: row.modelData.commandText || row.modelData.path || ""
         maximumWidth: row.width
     }
@@ -81,7 +82,7 @@ Rectangle {
         textFormat: Text.PlainText
         anchors.left: icon.right
         anchors.leftMargin: Style.space(10)
-        anchors.right: actionButtons.left
+        anchors.right: terminalIndicator.left
         anchors.rightMargin: Style.space(8)
         anchors.verticalCenter: parent.verticalCenter
         text: (row.modelData.folder && !panel.movingId ? (row.modelData.expanded === false ? "▸ " : "▾ ") : "") + row.modelData.name + (row.modelData.folder && !panel.movingId ? " (" + row.modelData.count + ")" : "") + (row.modelData.missing ? " (unavailable)" : "")
@@ -89,6 +90,36 @@ Rectangle {
         color: panel.barForeground
         font.family: Style.font.family
         font.pixelSize: Style.font.body
+    }
+    Rectangle {
+        id: terminalIndicator
+        objectName: "terminalIndicator"
+        // Receive hover above the row's MouseArea; clicks still pass through.
+        z: 1
+        visible: row.modelData.kind === "command" && row.modelData.runInTerminal !== false
+        anchors.right: actionButtons.left
+        anchors.verticalCenter: parent.verticalCenter
+        width: visible ? Style.space(18) : 0
+        height: Style.space(15)
+        radius: Style.space(2)
+        color: "transparent"
+        border.width: 1
+        border.color: Color.accent
+        Accessible.name: "Runs in terminal"
+        Text {
+            textFormat: Text.PlainText
+            anchors.centerIn: parent
+            text: ">_"
+            color: Color.accent
+            font.family: Style.font.family
+            font.pixelSize: Style.font.body * 0.75
+        }
+        HoverHandler { id: terminalHover }
+        PinToolTip {
+            objectName: "terminalToolTip"
+            visible: panel.opened && terminalIndicator.visible && terminalHover.hovered && !panel.draggedEntry
+            text: "Runs in terminal"
+        }
     }
     MouseArea {
         id: mouse

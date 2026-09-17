@@ -36,10 +36,32 @@ Scope {
             } else if (stage === 1) {
                 if (panel.folders.length !== 1) { console.log("FAIL group save"); Qt.quit(); return }
                 panel.editCommand(null, panel.folders[0].id)
+                if (!panel.commandTerminal.checked) { console.log("FAIL terminal default"); Qt.quit(); return }
+                panel.commandTerminal.checked = false
                 panel.commandName.text = "Example"; panel.commandText.text = "printf example"; panel.saveCommand()
                 stage = 2
             } else if (stage === 2) {
                 if (panel.pins.length !== 1 || panel.rows.length !== 2) { console.log("FAIL command save"); Qt.quit(); return }
+                if (panel.pins[0].runInTerminal !== false) { console.log("FAIL create nonterminal"); Qt.quit(); return }
+                panel.editCommand(panel.pins[0], panel.folders[0].id)
+                if (panel.commandTerminal.checked) { console.log("FAIL edit nonterminal"); Qt.quit(); return }
+                panel.commandTerminal.checked = true; panel.saveCommand(); stage = 8
+            } else if (stage === 8) {
+                if (panel.pins[0].runInTerminal !== true) { console.log("FAIL enable terminal"); Qt.quit(); return }
+                panel.editCommand(panel.pins[0], panel.folders[0].id)
+                if (!panel.commandTerminal.checked) { console.log("FAIL edit terminal"); Qt.quit(); return }
+                panel.commandTerminal.checked = false; panel.saveCommand(); stage = 9
+            } else if (stage === 9) {
+                if (panel.pins[0].runInTerminal !== false) { console.log("FAIL disable terminal"); Qt.quit(); return }
+                panel.editCommand(panel.pins[0], panel.folders[0].id)
+                panel.commandTerminal.checked = true
+                var escape = {key: Qt.Key_Escape, modifiers: 0, accepted: false}
+                panel.handleKey(escape)
+                if (panel.commandEditing || panel.pins[0].runInTerminal !== false) { console.log("FAIL cancel terminal edit"); Qt.quit(); return }
+                var legacy = Object.assign({}, panel.pins[0]); delete legacy.runInTerminal
+                panel.editCommand(legacy, panel.folders[0].id)
+                if (!panel.commandTerminal.checked) { console.log("FAIL legacy terminal default"); Qt.quit(); return }
+                panel.handleKey(escape)
                 panel.toggleFolder(panel.folders[0].id)
                 stage = 3
             } else if (stage === 3) {

@@ -35,10 +35,16 @@ test('saved commands use a revision-bound runner without command text in argv',(
  const entry={id:'cmd',pinId:'copy',kind:'command',commandText:value};
  const args=command(entry,'',{runner:'/plugin/backend/terminal.py',revision:'abc'});
  assert.deepEqual(args,['/usr/bin/uwsm-app','--','/usr/bin/xdg-terminal-exec','--','/usr/bin/python3','-I','/plugin/backend/terminal.py','copy','abc']);
+ assert.deepEqual(command({...entry,runInTerminal:true},'',{runner:'/plugin/backend/terminal.py',revision:'abc'}),args);
  assert.ok(!args.join(' ').includes(value));
  assert.equal(command(entry,''),null);
  assert.equal(command({...entry,commandText:'   '},'',{runner:'runner',revision:'rev'}),null);
  assert.equal(command(entry,'action',{runner:'runner',revision:'rev'}),null);
+});
+test('saved commands with terminal disabled launch the runner directly',()=>{
+ const entry={id:'cmd',kind:'command',commandText:'/home/example/Scripts/herdr-void',runInTerminal:false};
+ assert.deepEqual(command(entry,'',{runner:'/plugin/backend/terminal.py',revision:'abc'}),
+  ['/usr/bin/uwsm-app','--','/usr/bin/python3','-I','/plugin/backend/terminal.py','cmd','abc']);
 });
 test('group launch runs command-only and mixed groups using the normal command terminal',()=>{
  const {groupEntries}=require('../domain/Launch.js');

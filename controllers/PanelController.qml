@@ -26,6 +26,7 @@ Panel {
     property var folderInput: null
     property var commandName: null
     property var commandText: null
+    property var commandTerminal: null
     property var appMenu: null
     property var folderMenu: null
     property var dragFooter: null
@@ -122,6 +123,7 @@ Panel {
         errorMessage = "";
         commandName.text = entry ? entry.name : "";
         commandText.text = entry ? entry.commandText : "";
+        commandTerminal.checked = !entry || entry.runInTerminal !== false;
         Qt.callLater(function () {
             commandName.forceActiveFocus();
         });
@@ -142,7 +144,8 @@ Panel {
             next = pins.map(function (pin) {
                 return Folders.key(pin) === editingCommand ? Object.assign({}, pin, {
                     name: name,
-                    commandText: value
+                    commandText: value,
+                    runInTerminal: commandTerminal.checked
                 }) : pin;
             });
         else
@@ -154,7 +157,7 @@ Panel {
                     name: name,
                     commandText: value,
                     icon: "utilities-terminal",
-                    runInTerminal: true,
+                    runInTerminal: commandTerminal.checked,
                     folderId: commandGroup
                 }
             ]);

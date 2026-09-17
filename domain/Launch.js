@@ -8,8 +8,10 @@ function command(entry, actionId, context) {
     if (entry.kind === "command") {
         if (actionId || !String(entry.commandText || "").trim()) return null;
         if (!context || !context.runner || !context.revision) return null;
-        return ["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-terminal-exec", "--", "/usr/bin/python3", "-I",
-            context.runner, entry.pinId || entry.id, context.revision];
+        var runner = ["/usr/bin/python3", "-I", context.runner, entry.pinId || entry.id, context.revision];
+        var launcher = ["/usr/bin/uwsm-app", "--"];
+        if (entry.runInTerminal !== false) launcher.push("/usr/bin/xdg-terminal-exec", "--");
+        return launcher.concat(runner);
     }
     if (/^[\-]|[\x00-\x1f\x7f/]/.test(entry.id) || entry.id.length > 512) return null;
     if (actionId && (/^[\-]|[\x00-\x1f\x7f/:]/.test(actionId) || actionId.length > 256)) return null;

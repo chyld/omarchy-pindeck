@@ -61,7 +61,8 @@ class FirstUseTest(unittest.TestCase):
                 watcher.terminate()
                 watcher.communicate(timeout=5)
 
-            subprocess.run([sys.executable, '-I', str(plugin / 'backend/terminal.py'),
+            result = subprocess.run([sys.executable, '-I', str(plugin / 'backend/terminal.py'),
                             'missing', 'stale'], input='\n', text=True,
-                           capture_output=True, env=env, timeout=5, check=True)
+                           capture_output=True, env=env, timeout=5)
+            self.assertEqual(result.returncode, 1)
             unchanged()

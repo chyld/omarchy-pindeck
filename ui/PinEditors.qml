@@ -13,6 +13,7 @@ Column {
     property alias folderInput: folderInput
     property alias commandName: commandName
     property alias commandText: commandText
+    property alias commandTerminal: commandTerminal
     property alias search: search
     spacing: Style.space(5)
     Row {
@@ -124,10 +125,20 @@ Column {
                 panel.saveCommand();
             }
         }
+        CheckBox {
+            id: commandTerminal
+            text: "Run in terminal"
+            font.family: Style.font.family
+            palette.windowText: panel.barForeground
+            palette.buttonText: panel.barForeground
+            palette.highlight: Color.accent
+        }
         Text {
             textFormat: Text.PlainText
             width: parent.width
-            text: "Runs in Bash from your home folder. The terminal stays open until you press Enter."
+            text: commandTerminal.checked
+                ? "Runs in Bash from your home folder. The terminal stays open until you press Enter."
+                : "Runs in Bash from your home folder without opening a terminal."
             wrapMode: Text.WordWrap
             color: Color.muted
             font.pixelSize: Style.font.body * 0.85

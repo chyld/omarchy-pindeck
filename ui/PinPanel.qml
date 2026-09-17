@@ -15,6 +15,7 @@ Controllers.PanelController {
     folderInput: editors.folderInput
     commandName: editors.commandName
     commandText: editors.commandText
+    commandTerminal: editors.commandTerminal
     search: editors.search
     appMenu: menus.appMenu
     folderMenu: menus.folderMenu

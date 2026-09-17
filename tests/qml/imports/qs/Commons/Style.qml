@@ -6,5 +6,6 @@ QtObject {
         property string family: "sans-serif"
         property real body: 12
         property real bodySmall: 11
+        property real subtitle: 14
     }
 }
