@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "chyld.pindeck",
+  "name": "PinDeck",
+  "version": "0.1.0",
+  "author": "Chyld Medford",
+  "description": "A workflow is more than an app: it is the editor, the project folder, and the command you keep typing. PinDeck brings them together in your Omarchy bar. Pin installed apps, choose folders, and save terminal commands, then arrange them into collapsible groups for work, projects, or play. Open one item or launch the whole group with one click. Drag to reorder, keep the same app or folder in several groups, and edit everything through a plain JSON file. Your tools stay organized and ready when you need them.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "PinDeck",
+    "category": "Launchers",
+    "allowMultiple": false,
+    "defaultSection": "left",
+    "defaults": {
+      "pinnedApps": [],
+      "folders": [],
+      "rootOrder": []
+    },
+    "description": "Organize apps, folders, and commands into groups and open them together."
+  },
+  "license": "MIT"
+}
