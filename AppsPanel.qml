@@ -22,7 +22,7 @@ Panel {
     property var configuredHiddenIds: ({})
     property var desktopHiddenIds: ({})
     property bool visibilityReady: false
-    readonly property string configPath: Quickshell.env("HOME") + "/.config/omarchy/pinned.json"
+    readonly property string configPath: Quickshell.env("HOME") + "/.config/omarchy/pindeck.json"
     property var configData: ({version:1, pinnedApps:[], folders:[], rootOrder:[]})
     property bool configReady: false
     property string configError: ""
@@ -173,7 +173,7 @@ Panel {
         var targetFolders = nextFolders === undefined ? folders : nextFolders
         var targetOrder = Folders.rootOrder(next, targetFolders, nextOrder === undefined ? ordering : nextOrder)
         if (JSON.stringify(targetOrder) === JSON.stringify(ordering) && JSON.stringify(next) === JSON.stringify(pins) && JSON.stringify(targetFolders) === JSON.stringify(folders)) return true
-        if (!configReady || configError) { errorMessage = "Fix pinned.json before saving changes."; return false }
+        if (!configReady || configError) { errorMessage = "Fix pindeck.json before saving changes."; return false }
         var entry = Object.assign({}, configData, {version:1, pinnedApps:next, folders:targetFolders, rootOrder:targetOrder})
         try { Config.parse(JSON.stringify(entry)) }
         catch (error) { errorMessage = String(error); return false }
@@ -315,19 +315,40 @@ Panel {
                 root.configReady = true
                 root.configError = ""
             } catch (error) {
-                root.configError = "pinned.json: " + String(error)
+                root.configError = "pindeck.json: " + String(error)
             }
         }
         onFileChanged: reload()
         onLoadFailed: function(error) {
             if (error === FileViewError.FileNotFound && !root.configReady) {
-                // First use: preserve legacy inline widget data.
-                root.configData = {version:1, pinnedApps:root.setting("pinnedApps", []), folders:root.setting("folders", []), rootOrder:root.setting("rootOrder", [])}
-                setText(JSON.stringify(root.configData, null, 2) + "\n")
-            } else root.configError = "Cannot read pinned.json. Restore the file or check its permissions."
+                // Import the previous filename before considering inline data.
+                legacyPinnedFile.path = Quickshell.env("HOME") + "/.config/omarchy/pinned.json"
+            } else root.configError = "Cannot read pindeck.json. Restore the file or check its permissions."
         }
         onSaved: { root.configReady = true; root.configError = "" }
-        onSaveFailed: root.configError = "Could not save pinned.json. Check its permissions."
+        onSaveFailed: root.configError = "Could not save pindeck.json. Check its permissions."
+    }
+
+    FileView {
+        id: legacyPinnedFile
+        path: ""
+        preload: true
+        printErrors: false
+        onLoaded: {
+            try {
+                root.configData = Config.parse(text())
+                pinnedFile.setText(JSON.stringify(root.configData, null, 2) + "\n")
+            } catch (error) { root.configError = "Cannot migrate pinned.json: " + String(error) }
+        }
+        onLoadFailed: function(error) {
+            if (!path) return
+            if (error !== FileViewError.FileNotFound) {
+                root.configError = "Cannot read old pinned.json. Check its permissions."
+                return
+            }
+            root.configData = {version:1, pinnedApps:root.setting("pinnedApps", []), folders:root.setting("folders", []), rootOrder:root.setting("rootOrder", [])}
+            pinnedFile.setText(JSON.stringify(root.configData, null, 2) + "\n")
+        }
     }
 
     // Use the same exclusion file and desktop visibility scanner as Omarchy's

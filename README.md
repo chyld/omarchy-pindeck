@@ -13,7 +13,7 @@ Apps, folder shortcuts, and terminal commands share one compact panel. Groups co
 - **New group** collects related pins. Its launch button opens its apps, folders, and commands, even while collapsed.
 - **Drag** to reorder pins and groups. Drop onto a group's center to move inside; use the bottom drop area to return to the top level. Escape cancels.
 - **Right click** for desktop actions, moving, editing commands, renaming shortcuts or groups, and unpinning. Numbered buttons below apps expose their desktop actions; hover for names.
-- **Edit config** opens `~/.config/omarchy/pinned.json` in Omarchy's default editor. Valid saved edits reload automatically.
+- **Edit config** opens `~/.config/omarchy/pindeck.json` in Omarchy's default editor. Valid saved edits reload automatically.
 
 Arrow keys select and Enter activates. Escape goes back or closes. Menu or Shift+F10 opens the selected pin's actions. Ctrl+N creates a group, Ctrl+O adds a folder, and Ctrl+K adds a command.
 
@@ -33,7 +33,9 @@ The command runs when you launch the pin or its group. Bash expands `~`, variabl
 
 ## Configuration
 
-Pins, groups, their order, and expanded states live in `~/.config/omarchy/pinned.json`. The **Edit config** button uses Omarchy's selected default editor. The file reloads when saved; an invalid edit displays an error while keeping the last valid data visible.
+Existing installations using `pinned.json` are imported automatically when `pindeck.json` is absent; the old file is retained as a backup.
+
+Pins, groups, their order, and expanded states live in `~/.config/omarchy/pindeck.json`. The **Edit config** button uses Omarchy's selected default editor. The file reloads when saved; an invalid edit displays an error while keeping the last valid data visible.
 
 - `pinnedApps`: app, folder, and command pins. A `pinId` distinguishes independent copies; `folderId` identifies a group.
 - `folders`: organizational groups with IDs, names, and expanded states.
@@ -66,7 +68,7 @@ Requires Omarchy Quattro, Python 3, PyGObject (`python-gobject`), GTK 4, Bash, `
 
 ## What it does to your system
 
-- **Files written:** `~/.config/omarchy/pinned.json`, containing `version`, `pinnedApps`, `folders`, and `rootOrder`. Writes are atomic. Invalid edits preserve the last valid in-memory data and block UI saves until corrected.
+- **Files written:** `~/.config/omarchy/pindeck.json`, containing `version`, `pinnedApps`, `folders`, and `rootOrder`. Writes are atomic. Invalid edits preserve the last valid in-memory data and block UI saves until corrected.
 - **Network access:** PinDeck does not fetch remote data. Apps and commands you launch can access the network and operate with your user permissions.
 - **Credentials:** PinDeck has no credential store. Saved commands are plain text in the config file.
 - **Commands run:** app launches through `uwsm-app` and `gtk-launch`; terminals through `xdg-terminal-exec`; folder selection and validation through `bin/locations.py`; folder opening through `xdg-open`; editor opening through `omarchy launch editor`; folder failure notifications through `notify-send`.
@@ -80,7 +82,7 @@ Requires Omarchy Quattro, Python 3, PyGObject (`python-gobject`), GTK 4, Bash, `
 omarchy plugin remove chyld.pindeck
 ```
 
-Your `~/.config/omarchy/pinned.json` remains so your saved pins can be restored after reinstalling. Applications and commands already launched continue running.
+Your `~/.config/omarchy/pindeck.json` remains so your saved pins can be restored after reinstalling. Applications and commands already launched continue running.
 
 ## Files
 
