@@ -12,11 +12,7 @@ Pin your apps and folders, write your own custom commands, and group them by pro
 
 **Folders.** Click **Add folder** and choose a directory. Home, Downloads, a deep project directory: each becomes a shortcut that opens in your default file manager. Give it a useful name; hover to see the full path.
 
-**Commands.** Click **Add command**, give it a name, and save the command you want to run. For example, **List downloads**:
-
-```sh
-eza -a -l ~/Downloads
-```
+**Commands.** Click **Add command**, give it a name, and save the command you want to run.
 
 Commands run using Bash, starting from your home directory. `~`, variables, pipes, and redirects work.
 
@@ -26,6 +22,18 @@ Commands run using Bash, starting from your home directory. `~`, variables, pipe
 Set the checkbox when creating a command, or right-click an existing command and choose **Edit command** to change it. Editing restores the saved setting; cancelling leaves it unchanged. Group launches respect each command's setting.
 
 Commands that run in a terminal show a small `>_` indicator at the right of their row. Hover over it for **Runs in terminal**, styled like the other tooltips. Hover over the command name to see the saved command text. Clicking the indicator launches the command just like clicking its name.
+
+### Command examples
+
+| Name | Command | Run in terminal |
+| --- | --- | --- |
+| List downloads | `eza -a -l ~/Downloads` | Checked — browse the listing and exit status. |
+| System monitor | `btop` | Checked — use the interactive CPU, memory, and process monitor. |
+| Project status | `git -C "$HOME/Projects/my-app" status --short --branch` | Checked — review the branch and changed files. |
+| Edit project | `code "$HOME/Projects/my-app"` | Unchecked — open the project in Visual Studio Code. |
+| Open GitHub | `xdg-open 'https://github.com'` | Unchecked — open the site in your default browser. |
+
+Replace `~/Projects/my-app` with your project's path. Each example requires the named program to be installed; the Git example also requires an existing repository.
 
 ## Arrange it your way
 
