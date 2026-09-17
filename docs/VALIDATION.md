@@ -23,6 +23,8 @@ Local host: Omarchy 4.0.4, Qt 6.11.2, Wayland; 2026-09-17.
   byte-for-byte unchanged after installing the rewrite. A private local backup
   was taken before installation; no configuration contents are committed.
 - `git diff --check` passed.
+- GitHub Actions passed on Ubuntu 24.04 for the implementation candidate:
+  [portable tests, mutation checks, and coverage](https://github.com/chyld/omarchy-pindeck/actions/runs/35198595660).
 
 The isolated shell logged a desktop portal registration warning because a live
 shell already owned the connection. It loaded its QML and completed the tests.
