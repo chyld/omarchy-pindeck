@@ -35,8 +35,7 @@ function move(pins, id, folderId) {
 }
 function remove(pins, folders, id) {
     return {
-        pins:pins.filter(function(pin) { return pin.folderId !== id || !conflict(pins, pin, "") })
-            .map(function(pin) { return pin.folderId === id ? Object.assign({}, pin, {folderId:""}) : pin }),
+        pins:pins.filter(function(pin) { return pin.folderId !== id }),
         folders:folders.filter(function(folder) { return folder.id !== id })
     }
 }

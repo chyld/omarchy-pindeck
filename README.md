@@ -4,7 +4,7 @@
 
 Before you can work, you have to open everything: the editor, the browser, the project folder, the terminal running that command you always forget. Tomorrow, you do it again.
 
-PinDeck puts that setup in your Omarchy bar. Collect apps, folders, and commands into a named group, arrange them once, and click its rocket to open the whole set. Keep your everyday favorites at the top level and collapse the rest until you need them.
+PinDeck puts that setup in your Omarchy bar. Collect apps, folders, and commands into a named group, arrange them once, and click its lightning bolt to open the whole set. Keep your everyday favorites at the top level and collapse the rest until you need them.
 
 A deck for each project. A place for every shortcut. Less setup between you and the work.
 
@@ -17,7 +17,7 @@ A deck for each project. A place for every shortcut. Less setup between you and 
 | **Daily** | Mail, notes, Downloads, and your morning terminal commands |
 | **A specific project** | The apps, directories, and commands that belong to that project |
 
-Open a single pin when that is all you need. Open the group when it is time to get started. The rocket works even when the group is collapsed.
+Open a single pin when that is all you need. Open the group when it is time to get started. The lightning bolt works even when the group is collapsed.
 
 ## Three kinds of pins, one place
 
@@ -35,11 +35,11 @@ Commands run in your configured terminal using Bash, starting from your home dir
 
 ## Arrange it your way
 
-- **Create groups** with **New group**. Right-click a group to add apps, folders, or commands directly inside it.
+- **Create groups** with **Add group**. Right-click a group to add apps, folders, or commands directly inside it.
 - **Drag to reorder** pins and groups. Drop a pin onto a group's center to move it inside, or onto the bottom drop area to move it back to the top level.
 - **Reuse your favorites.** The same app or folder can appear in several groups, plus once at the top level. Each copy has its own position; folder copies can have different names.
 - **Change things in place.** Right-click to move or unpin an item, rename a folder shortcut, or edit a command. Removing one copy leaves the others alone.
-- **Delete a group without losing its tools.** Its pins return to the top level. If an app or folder is already there, PinDeck keeps the existing copy.
+- **Delete a group and its pins.** Copies at the top level or in other groups remain. The underlying apps and files are unaffected.
 
 Groups use a four-square grid icon, folders use folder icons, and commands use terminal icons. The panel follows your Omarchy theme and keeps the layout compact.
 
@@ -49,7 +49,7 @@ Groups use a four-square grid icon, folders use folder icons, and commands use t
 omarchy plugin add https://github.com/chyld/omarchy-pindeck.git --enable
 ```
 
-Click the pin icon in your bar, add your first few items, and make a group when you are ready.
+Click the four-tile icon in your bar, add your first few items, and make a group when you are ready.
 
 PinDeck requires Omarchy Quattro, Python 3, PyGObject (`python-gobject`), GTK 4, Bash, `uwsm-app`, `gtk-launch`, `xdg-terminal-exec`, `xdg-open`, and `notify-send`. Programs used in your saved commands must be installed separately.
 
@@ -79,7 +79,9 @@ Everything you arrange is stored in:
 ~/.config/omarchy/pindeck.json
 ```
 
-Click **Edit config** to open it in your default Omarchy editor. Valid changes reload automatically. If an edit is invalid, PinDeck displays an error and keeps the last valid data visible instead of replacing your setup.
+Manage your pins and groups through the panel. Valid external configuration changes reload automatically. If an edit is invalid, PinDeck displays an error and keeps the last valid data visible instead of replacing your setup.
+
+Deleting `pindeck.json` while PinDeck is running resets the panel and recreates the file with empty pins and groups.
 
 The file is plain JSON: `pinnedApps` holds your pins, `folders` holds your groups, and `rootOrder` records their top-level order. Stable `pinId` and `folderId` values connect the pieces; `version` is currently `1`. Directory shortcuts use `kind: "location"` with an absolute `path`; commands use `kind: "command"` with `commandText`.
 
@@ -93,7 +95,7 @@ PinDeck runs inside the Omarchy shell. It reads installed desktop entries and sa
 - **Folder shortcuts** use a native chooser and open through `xdg-open`. An unavailable folder reports an error without stopping the remaining group launches.
 - **Focus** follows a matching launched window, with the pointer moved to its center. Group launches track the final app or folder manager.
 - **Network and credentials:** PinDeck fetches no remote data and has no credential store. Saved commands are plain text. The apps and commands you launch run with your user permissions and may access files, credentials, or the network as those programs normally do.
-- **Configuration:** the editor button runs `omarchy launch editor`. PinDeck writes `~/.config/omarchy/pindeck.json`; it does not install dependencies or add startup commands.
+- **Configuration:** PinDeck writes `~/.config/omarchy/pindeck.json`; it does not install dependencies or add startup commands.
 
 ## Remove
 

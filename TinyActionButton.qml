@@ -10,9 +10,10 @@ Button {
     implicitHeight: Style.space(21)
     padding: Style.space(3)
     Accessible.name: actionName
-    ToolTip.visible: hovered || activeFocus
-    ToolTip.delay: 300
-    ToolTip.text: actionName
+    PinToolTip {
+        visible: root.hovered || root.activeFocus
+        text: root.actionName
+    }
     background: Rectangle {
         radius: Style.space(4)
         color: Qt.alpha(Color.accent, root.down ? 0.35 : (root.hovered || root.activeFocus ? 0.24 : 0.1))

@@ -17,6 +17,7 @@ Panel {
     property var anchorItem: null
     property var hostWidget: null
     property bool picking: false
+    property bool keyboardNavigation: false
     property string errorMessage: ""
     readonly property string omarchyPath: Quickshell.env("OMARCHY_PATH") || "/usr/share/omarchy"
     property var configuredHiddenIds: ({})
@@ -25,6 +26,7 @@ Panel {
     readonly property string configPath: Quickshell.env("HOME") + "/.config/omarchy/pindeck.json"
     property var configData: ({version:1, pinnedApps:[], folders:[], rootOrder:[]})
     property bool configReady: false
+    property bool configSeen: false
     property string configError: ""
     readonly property var pins: configData.pinnedApps
     readonly property var applications: DesktopEntries.applications.values
@@ -159,6 +161,7 @@ Panel {
     }
 
     function open() {
+        keyboardNavigation = false
         commandEditing = false
         picking = false
         movingId = ""
@@ -253,6 +256,7 @@ Panel {
         appMenu.popup(item, x, y)
     }
     function move(delta) {
+        keyboardNavigation = true
         list.currentIndex = Math.max(0, Math.min(rows.length - 1, list.currentIndex + delta))
         list.positionViewAtIndex(list.currentIndex, ListView.Contain)
     }
@@ -309,6 +313,7 @@ Panel {
         atomicWrites: true
         printErrors: false
         onLoaded: {
+            root.configSeen = true
             try {
                 var parsed = Config.parse(text())
                 if (JSON.stringify(parsed) !== JSON.stringify(root.configData)) root.configData = parsed
@@ -320,12 +325,18 @@ Panel {
         }
         onFileChanged: reload()
         onLoadFailed: function(error) {
-            if (error === FileViewError.FileNotFound && !root.configReady) {
-                // Import the previous filename before considering inline data.
-                legacyPinnedFile.path = Quickshell.env("HOME") + "/.config/omarchy/pinned.json"
+            if (error === FileViewError.FileNotFound) {
+                if (root.configSeen) {
+                    root.configReady = false
+                    root.configData = {version:1, pinnedApps:[], folders:[], rootOrder:[]}
+                    pinnedFile.setText(JSON.stringify(root.configData, null, 2) + "\n")
+                } else {
+                    // Import legacy settings only on the initial missing-file load.
+                    legacyPinnedFile.path = Quickshell.env("HOME") + "/.config/omarchy/pinned.json"
+                }
             } else root.configError = "Cannot read pindeck.json. Restore the file or check its permissions."
         }
-        onSaved: { root.configReady = true; root.configError = "" }
+        onSaved: { root.configSeen = true; root.configReady = true; root.configError = "" }
         onSaveFailed: root.configError = "Could not save pindeck.json. Check its permissions."
     }
 
@@ -535,7 +546,7 @@ Panel {
                 ActionMenuItem { text: "Add command"; onTriggered: root.editCommand(null, folderMenu.entry.id) }
                 ActionMenuItem { text: "Rename group"; onTriggered: root.editFolder(folderMenu.entry.id) }
                 ActionMenuItem {
-                    text: "Delete group (keep pins)"
+                    text: "Delete group and its pins"
                     onTriggered: {
                         var next = Folders.remove(root.pins, root.folders, folderMenu.entry.id)
                         root.save(next.pins, next.folders)
@@ -643,11 +654,13 @@ Panel {
                         required property var modelData
                         required property int index
                         width: list.width
-                        ToolTip.visible: mouse.containsMouse && (modelData.kind === "location" || modelData.kind === "command") && !root.draggedEntry
-                        ToolTip.text: modelData.commandText || modelData.path || ""
-                        ToolTip.delay: 400
+                        PinToolTip {
+                            visible: root.opened && mouse.containsMouse && (row.modelData.kind === "location" || row.modelData.kind === "command") && !root.draggedEntry
+                            text: row.modelData.commandText || row.modelData.path || ""
+                            maximumWidth: row.width
+                        }
                         readonly property var appActions: modelData.kind !== "location" && !modelData.folder && !root.movingId && !root.picking && !modelData.missing ? modelData.actions || [] : []
-                        height: row.appActions.length > 0 ? Math.max(Style.space(32), appName.implicitHeight + actionButtons.implicitHeight + Style.space(8)) : Style.space(32)
+                        height: Math.max(Style.space(32), actionButtons.implicitHeight + Style.space(8))
                         readonly property bool dropTarget: !!root.dropEntry && Folders.key(root.dropEntry) === Folders.key(modelData) && !!root.dropEntry.folder === !!modelData.folder
                         opacity: root.draggedEntry && Folders.key(root.draggedEntry) === Folders.key(modelData) && !!root.draggedEntry.folder === !!modelData.folder ? 0.45 : 1
                         border.width: dropTarget && root.dropZone === "inside" ? 2 : 0
@@ -661,7 +674,16 @@ Panel {
                             color: Color.accent
                         }
                         radius: Style.space(5)
-                        color: ListView.isCurrentItem || mouse.containsMouse ? Qt.alpha(Color.accent, 0.16) : "transparent"
+                        color: (root.keyboardNavigation ? ListView.isCurrentItem : rowHover.hovered) ? Qt.alpha(Color.accent, 0.16) : "transparent"
+                        HoverHandler {
+                            id: rowHover
+                            onHoveredChanged: {
+                                if (hovered && !root.draggedEntry) {
+                                    root.keyboardNavigation = false
+                                    list.currentIndex = row.index
+                                }
+                            }
+                        }
                         Image {
                             id: icon
                             anchors.left: parent.left
@@ -690,8 +712,9 @@ Panel {
                             id: appName
                             anchors.left: icon.right
                             anchors.leftMargin: Style.space(10)
-                            anchors.right: openGroup.left
-                            y: row.appActions.length > 0 ? Style.space(3) : (parent.height - height) / 2
+                            anchors.right: actionButtons.left
+                            anchors.rightMargin: Style.space(8)
+                            anchors.verticalCenter: parent.verticalCenter
                             text: (row.modelData.folder && !root.movingId ? (row.modelData.expanded === false ? "▸ " : "▾ ") : "") + row.modelData.name + (row.modelData.folder && !root.movingId ? " (" + row.modelData.count + ")" : "") + (row.modelData.missing ? " (unavailable)" : "")
                             textFormat: Text.PlainText
                             elide: Text.ElideRight
@@ -702,7 +725,7 @@ Panel {
                         MouseArea {
                             id: mouse
                             anchors.fill: parent
-                            anchors.rightMargin: action.width + openGroup.width
+                            anchors.rightMargin: action.width + openGroup.width + actionButtons.width
                             hoverEnabled: true
                             acceptedButtons: Qt.LeftButton | Qt.RightButton
                             cursorShape: root.draggedEntry ? Qt.ClosedHandCursor : Qt.PointingHandCursor
@@ -712,6 +735,10 @@ Panel {
                             property bool didDrag: false
                             onPressed: function(event) { pressX = event.x; pressY = event.y; didDrag = false }
                             onPositionChanged: function(event) {
+                                if (!pressedButtons) {
+                                    root.keyboardNavigation = false
+                                    list.currentIndex = row.index
+                                }
                                 if (!(pressedButtons & Qt.LeftButton) || root.picking || root.movingId || root.naming) return
                                 if (!didDrag && Math.hypot(event.x - pressX, event.y - pressY) >= Style.space(8)) {
                                     didDrag = true
@@ -735,10 +762,9 @@ Panel {
                         Flow {
                             id: actionButtons
                             visible: row.appActions.length > 0
-                            anchors.left: appName.left
-                            anchors.right: action.left
-                            anchors.rightMargin: Style.space(6)
-                            y: appName.y + appName.height + Style.space(2)
+                            anchors.right: openGroup.left
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: visible ? Math.min(parent.width / 2, row.appActions.length * Style.space(21) + (row.appActions.length - 1) * spacing) : 0
                             spacing: Style.space(5)
                             Repeater {
                                 model: row.appActions
@@ -758,28 +784,34 @@ Panel {
                             anchors.verticalCenter: parent.verticalCenter
                             width: visible ? Style.space(28) : 0
                             height: Style.space(26)
-                            iconText: "󰑣"
+                            iconText: "⚡"
                             enabled: visible && Launch.groupEntries(root.pins, root.applications, row.modelData.id).length > 0
                             Accessible.name: "Open everything in " + row.modelData.name
-                            tooltipText: "Open everything in “" + row.modelData.name + "”"
+                            PinToolTip {
+                                visible: root.opened && openGroup.hot && openGroup.visible && !root.draggedEntry
+                                text: "Open everything in “" + row.modelData.name + "”"
+                            }
                             onClicked: root.launchGroup(row.modelData.id)
                         }
                         Button {
                             id: action
+                            visible: root.picking || !!root.movingId
                             anchors.right: parent.right
                             anchors.verticalCenter: parent.verticalCenter
-                            width: Style.space(48)
+                            width: visible ? Style.space(48) : 0
                             height: Style.space(26)
-                            text: root.movingId ? "Move" : row.modelData.folder ? "+" : root.picking ? (root.isPinned(row.modelData.id) ? "✓" : "Pin") : "×"
+                            text: root.movingId ? "Move" : (root.isPinned(row.modelData.id) ? "✓" : "Pin")
+                            foreground: Color.accent
+                            accent: foreground
+                            background: Qt.alpha(foreground, 0.14)
+                            radius: Style.space(4)
                             enabled: true
-                            Accessible.name: root.movingId ? "Move to " + row.modelData.name : row.modelData.folder ? "Add app to " + row.modelData.name : root.picking ? "Pin " + row.modelData.name : "Unpin " + row.modelData.name
-                            ToolTip.visible: hovered
-                            ToolTip.text: root.movingId ? "Move here" : row.modelData.folder ? "Add app to group" : root.picking ? (root.isPinned(row.modelData.id) ? "Pinned in " + root.folderName(root.targetFolder) + " · Click to reveal" : "Pin app") : "Unpin app"
-                            onClicked: {
-                                if (root.picking || root.movingId) root.activate(row.modelData)
-                                else if (row.modelData.folder) root.addApp(row.modelData.id)
-                                else root.save(root.pins.filter(function(pin) { return Folders.key(pin) !== Folders.key(row.modelData) }))
+                            Accessible.name: root.movingId ? "Move to " + row.modelData.name : "Pin " + row.modelData.name
+                            PinToolTip {
+                                visible: root.opened && action.hot && action.visible
+                                text: root.movingId ? "Move here" : (root.isPinned(row.modelData.id) ? "Pinned in " + root.folderName(root.targetFolder) + " · Click to reveal" : "Pin app")
                             }
+                            onClicked: root.activate(row.modelData)
                         }
                     }
                 }
@@ -800,48 +832,63 @@ Panel {
                     color: Color.urgent
                     font.pixelSize: Style.font.body
                 }
+                Item {
+                    visible: !root.commandEditing && !root.picking && !root.movingId
+                    width: parent.width
+                    height: Style.space(5)
+                    Rectangle {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: parent.width
+                        height: 1
+                        color: Qt.alpha(Color.muted, 0.5)
+                    }
+                }
                 Grid {
                     columns: 2
                     visible: !root.commandEditing && !root.picking && !root.movingId
                     width: parent.width
-                    spacing: Style.space(5)
+                    spacing: Style.space(6)
                     Button {
                         width: (parent.width - parent.spacing) / 2
-                        height: Style.space(28)
+                        height: Style.space(22)
                         text: "+ Add app"
+                        foreground: Color.accent
+                        background: Qt.alpha(Color.accent, 0.1)
+                        radius: Style.space(4)
                         onClicked: root.addApp("")
                     }
                     Button {
                         width: (parent.width - parent.spacing) / 2
-                        height: Style.space(28)
+                        height: Style.space(22)
                         text: "+ Add folder"
+                        foreground: Color.accent
+                        background: Qt.alpha(Color.accent, 0.1)
+                        radius: Style.space(4)
                         onClicked: root.addLocation("")
                     }
                     Button {
                         width: (parent.width - parent.spacing) / 2
-                        height: Style.space(28)
+                        height: Style.space(22)
                         text: "+ Add command"
+                        foreground: Color.accent
+                        background: Qt.alpha(Color.accent, 0.1)
+                        radius: Style.space(4)
                         onClicked: root.editCommand(null, "")
                     }
                     Button {
                         width: (parent.width - parent.spacing) / 2
-                        height: Style.space(28)
-                        text: "+ New group"
+                        height: Style.space(22)
+                        text: "+ Add group"
+                        foreground: Color.accent
+                        background: Qt.alpha(Color.accent, 0.1)
+                        radius: Style.space(4)
                         onClicked: root.editFolder("")
                     }
-                }
-                Button {
-                    visible: !root.commandEditing && !root.picking && !root.movingId
-                    width: parent.width
-                    height: Style.space(28)
-                    text: "Edit config"
-                    tooltipText: root.configPath
-                    onClicked: { root.close(); Util.execArgv(["omarchy", "launch", "editor", root.configPath]) }
                 }
                 Rectangle {
                     id: dragFooter
                     width: parent.width
-                    height: Style.space(22)
+                    height: Style.space(18)
                     color: root.draggedEntry ? Qt.alpha(Color.accent, 0.15) : "transparent"
                     border.width: root.dropZone === "end" ? 1 : 0
                     border.color: Color.accent

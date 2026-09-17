@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Ui
+import qs.Commons
 
 BarWidget {
     id: root
@@ -18,8 +19,18 @@ BarWidget {
         id: button
         anchors.fill: parent
         bar: root.bar
-        text: "󰐃"
+        hasVisualContent: true
+        labelVisible: false
+        implicitWidth: vertical ? barSize : deckIcon.implicitWidth + scaledHorizontalMargin * 2
+        implicitHeight: vertical ? deckIcon.implicitHeight + scaledVerticalPadding * 2 : barSize
         tooltipText: "PinDeck"
+        DeckIcon {
+            id: deckIcon
+            anchors.centerIn: parent
+            width: implicitWidth
+            height: implicitHeight
+            outline: root.opened || button.tooltipHovered ? Color.accent : button.foreground
+        }
         onPressed: function(mouseButton) {
             if (mouseButton === Qt.LeftButton) root.toggle()
         }

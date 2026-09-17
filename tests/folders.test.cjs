@@ -26,11 +26,10 @@ test('serialized settings retain order, membership, and expansion',()=>{
  assert.equal(rows[1].expanded,false);
  assert.deepEqual(command(rows[3],''),command(apps[1],''));
 });
-test('deleting a folder keeps all pins, other folders and relative pin order',()=>{
+test('deleting a group removes its pins and preserves other groups without mutating input',()=>{
  const moved=F.move(pins,'a','work');
  const state=F.remove(moved,[{id:'work'},{id:'other'}],'work');
- assert.deepEqual(state.pins.map(p=>p.id),['a','b']);
- assert.equal(state.pins[0].folderId,'');
+ assert.deepEqual(state.pins.map(p=>p.id),['b']);
  assert.deepEqual(state.folders,[{id:'other'}]);
  assert.equal(moved[0].folderId,'work');
 });
@@ -80,9 +79,9 @@ test('stale ordering removes deleted entries and appends new pins without loss',
  assert.deepEqual(F.rootOrder(pins,[{id:'one'}],['app:b','app:b','app:gone']),['app:b','app:a','folder:one']);
  const moved=F.move(pins,'a','one');
  const removed=F.remove(moved,[{id:'one'}],'one');
- assert.deepEqual(F.rootOrder(removed.pins,removed.folders,['app:b','folder:one']),['app:b','app:a']);
+ assert.deepEqual(F.rootOrder(removed.pins,removed.folders,['app:b','folder:one']),['app:b']);
 });
-test('directory shortcuts retain paths and names through grouping, reorder and deletion',()=>{
+test('directory shortcuts retain paths when grouped and are removed with their group',()=>{
  const shortcut={id:'location:/home/user/My Photos',kind:'location',path:'/home/user/My Photos',name:'Photos',icon:'folder'};
  const all=pins.concat([shortcut]);
  assert.equal(F.rows(all,[],apps).at(-1),shortcut);
@@ -92,9 +91,8 @@ test('directory shortcuts retain paths and names through grouping, reorder and d
  assert.equal(row.missing,undefined);
  state=F.remove(state.pins,state.folders,'group');
  row=F.rows(state.pins,state.folders,apps).find(r=>r.id===shortcut.id);
- assert.equal(row.kind,'location');
- assert.equal(row.name,'Photos');
- assert.equal(row.folderId,'');
+ assert.equal(row,undefined);
+ assert.deepEqual(state.pins,pins);
 });
 test('copies of the same app have independent identity, movement and removal',()=>{
  const copies=[{id:'a',name:'A'}, {id:'a',pinId:'copy1',folderId:'one'}, {id:'a',pinId:'copy2',folderId:'two'}];
@@ -124,8 +122,8 @@ test('dragging a copy rejects duplicates and preserves the other copies',()=>{
 test('deleting a group keeps existing top-level copy and all copies in other groups',()=>{
  const copies=[{id:'a'},{id:'a',pinId:'one',folderId:'one'},{id:'a',pinId:'two',folderId:'two'},{id:'b',pinId:'b-one',folderId:'one'}];
  const result=F.remove(copies,[{id:'one'},{id:'two'}],'one');
- assert.deepEqual(result.pins.map(F.key),['a','two','b-one']);
- assert.equal(result.pins[2].folderId,'');
+ assert.deepEqual(result.pins.map(F.key),['a','two']);
+ assert.equal(result.pins[1].folderId,'two');
 });
 test('same-path directory copies have independent labels, moves and removal',()=>{
  const id='location:/home/user/Photos';
@@ -144,13 +142,13 @@ test('same-path directory copies have independent labels, moves and removal',()=
  const deleted=F.remove(copies,groups,'work');
  assert.deepEqual(deleted.pins.map(F.key),[id,'personal-photos']);
 });
-test('command pins preserve their command when grouped, reordered and removed from a group',()=>{
+test('command pins preserve their command when grouped and are removed with their group',()=>{
  const pin={id:'cmd',pinId:'cmd',kind:'command',name:'Downloads',commandText:'eza -a -l ~/Downloads',runInTerminal:true};
  let state=F.drop([pin],[{id:'g'}],[],pin,{id:'g',folder:true},'inside');
  const rendered=F.rows(state.pins,state.folders,[]);
  assert.equal(rendered[1].commandText,pin.commandText);
  assert.equal(rendered[1].missing,undefined);
  state=F.remove(state.pins,state.folders,'g');
- assert.equal(state.pins[0].folderId,'');
- assert.equal(state.pins[0].commandText,pin.commandText);
+ assert.deepEqual(state.pins,[]);
+ assert.deepEqual(state.folders,[]);
 });
