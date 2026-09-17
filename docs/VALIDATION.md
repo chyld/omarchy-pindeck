@@ -31,11 +31,13 @@ shell already owned the connection. It loaded its QML and completed the tests.
 
 ## Installed desktop checks still outstanding
 
-The installed checkout was upgraded. `omarchy restart shell` refused to restart
-while the session was locked. No attempt was made to bypass that protection.
-Consequently, visible popup inspection and confirmation that the running installed
-shell uses this candidate remain unverified. After unlocking, run
-`omarchy restart shell` and complete the live checklist in TESTING.md.
+The installed checkout was upgraded. The first restart was refused while the
+session was locked. After the user unlocked it, `omarchy restart shell` succeeded.
+The installed popup opened and was visually inspected: existing groups and pins,
+right-aligned lightning actions, section divider, and spaced admin buttons loaded.
+Exactly one configuration watcher was running. The real configuration remained
+byte-for-byte unchanged. An initial summon during startup returned `unknown`;
+retrying after plugin discovery completed returned `ok` and opened the popup.
 
 Also unverified: native chooser interaction/cancellation, real GUI and desktop-action
 launches, theme/vertical-bar changes, disabled/re-enabled service, and full clean
