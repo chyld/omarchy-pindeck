@@ -1,5 +1,7 @@
 # PinDeck
 
+![PinDeck preview showing grouped apps, folders, and commands in the Omarchy bar](docs/preview.png)
+
 **Your next task, one click away.**
 
 Before you can work, you have to open everything: the editor, the browser, the project folder, the terminal running that command you always forget. Tomorrow, you do it again.
