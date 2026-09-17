@@ -4,7 +4,7 @@
 
 Pin your apps and folders, write your own custom commands, and group them by project in your Omarchy bar. Press a group’s ⚡ button to open every app and folder and run every command. Set it up once. Get straight to work.
 
-![PinDeck preview showing grouped apps, folders, and commands in the Omarchy bar](docs/preview.png)
+![PinDeck preview showing grouped apps, folders, and commands in the Omarchy bar](preview.png)
 
 ## Three kinds of pins, one place
 
