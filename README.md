@@ -1,25 +1,10 @@
 # PinDeck
 
+**Your whole setup. One click.**
+
+Stop opening the same apps, hunting for folders, and retyping commands. Pin them to your Omarchy bar, group them by project, and launch the whole group in one click. Set it up once. Get straight to work.
+
 ![PinDeck preview showing grouped apps, folders, and commands in the Omarchy bar](docs/preview.png)
-
-**Your next task, one click away.**
-
-Before you can work, you have to open everything: the editor, the browser, the project folder, the terminal running that command you always forget. Tomorrow, you do it again.
-
-PinDeck puts that setup in your Omarchy bar. Collect apps, folders, and commands into a named group, arrange them once, and click its lightning bolt to open the whole set. Keep your everyday favorites at the top level and collapse the rest until you need them.
-
-A deck for each project. A place for every shortcut. Less setup between you and the work.
-
-## Build a deck for what you do
-
-| Group | What goes inside |
-| --- | --- |
-| **Development** | Your editor, browser, project folder, and a command to start the dev server |
-| **Photos** | Your photo editor, camera imports, and the folder where finished pictures go |
-| **Daily** | Mail, notes, Downloads, and your morning terminal commands |
-| **A specific project** | The apps, directories, and commands that belong to that project |
-
-Open a single pin when that is all you need. Open the group when it is time to get started. The lightning bolt works even when the group is collapsed.
 
 ## Three kinds of pins, one place
 
