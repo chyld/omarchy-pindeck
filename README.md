@@ -2,7 +2,7 @@
 
 **Your whole setup. One click.**
 
-Stop opening the same apps, hunting for folders, and retyping commands. Pin them to your Omarchy bar, group them by project, and launch the whole group in one click. Set it up once. Get straight to work.
+Pin your apps and folders, write your own custom commands, and group them by project in your Omarchy bar. Press a group’s ⚡ button to open every app and folder and run every command. Set it up once. Get straight to work.
 
 ![PinDeck preview showing grouped apps, folders, and commands in the Omarchy bar](docs/preview.png)
 

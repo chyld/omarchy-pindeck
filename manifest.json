@@ -4,7 +4,7 @@
   "name": "PinDeck",
   "version": "0.2.0",
   "author": "Chyld Medford",
-  "description": "Open your whole setup in one click. Group apps, folders, and terminal commands in your Omarchy bar. Less clicking. Less retyping. More doing.",
+  "description": "Your whole setup, one click away. Group apps, folders, and custom commands you write in your Omarchy bar. Press a group’s launch button to open every app and folder and run every command.",
   "kinds": [
     "service",
     "bar-widget"
@@ -23,7 +23,7 @@
       "folders": [],
       "rootOrder": []
     },
-    "description": "Launch your apps, folders, and commands together in one click."
+    "description": "Group apps, folders, and your own custom commands. One button launches everything in the group."
   },
   "license": "MIT"
 }
