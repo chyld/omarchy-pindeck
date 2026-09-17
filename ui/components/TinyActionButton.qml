@@ -22,6 +22,7 @@ Button {
     }
     contentItem: Item {
         Text {
+            textFormat: Text.PlainText
             anchors.centerIn: parent
             text: root.actionNumber
             color: Color.foreground

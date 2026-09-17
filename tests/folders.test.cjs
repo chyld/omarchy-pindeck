@@ -1,7 +1,7 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const F=require('../Folders.js');
-const {command}=require('../Launch.js');
+const F=require('../domain/Folders.js');
+const {command}=require('../domain/Launch.js');
 const apps=[{id:'a',name:'A',actions:[{id:'new'}]},{id:'b',name:'B',runInTerminal:true}];
 const pins=apps.map(({id,name})=>({id,name}));
 test('legacy pins and orphaned folder memberships remain visible',()=>{

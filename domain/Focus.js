@@ -22,6 +22,7 @@ function choose(windows, app, previous, activeAddress) {
 }
 function center(window) {
     if (!window.at || !window.size || window.size[0] <= 0 || window.size[1] <= 0) return null;
+    if (window.at.concat(window.size).some(function(value) { return typeof value !== "number" || !isFinite(value) || Math.abs(value) > 1000000; })) return null;
     return {x: Math.round(window.at[0] + window.size[0] / 2), y: Math.round(window.at[1] + window.size[1] / 2)};
 }
 if (typeof module !== "undefined") module.exports = {matches: matches, choose: choose, center: center};

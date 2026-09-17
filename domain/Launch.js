@@ -1,5 +1,5 @@
 // Pass desktop IDs/actions as arguments, never as shell command strings.
-function command(entry, actionId) {
+function command(entry, actionId, context) {
     if (!entry || !entry.id || entry.missing) return null;
     if (entry.kind === "location") {
         if (actionId || !entry.path || entry.path.charAt(0) !== "/") return null;
@@ -7,12 +7,12 @@ function command(entry, actionId) {
     }
     if (entry.kind === "command") {
         if (actionId || !String(entry.commandText || "").trim()) return null;
-        // The saved command is a separate argv value, interpreted only by the
-        // requested shell. An outer shell holds the terminal even after exit.
-        return ["uwsm-app", "--", "xdg-terminal-exec", "--", "bash", "-lc",
-            'cd "$HOME" || exit; bash -lc "$1"; result=$?; printf "\\nExit status: %s\\nPress Enter to close…" "$result"; read -r reply',
-            "pinned-command", entry.commandText];
+        if (!context || !context.runner || !context.revision) return null;
+        return ["/usr/bin/uwsm-app", "--", "/usr/bin/xdg-terminal-exec", "--", "/usr/bin/python3", "-I",
+            context.runner, entry.pinId || entry.id, context.revision];
     }
+    if (/^[\-]|[\x00-\x1f\x7f/]/.test(entry.id) || entry.id.length > 512) return null;
+    if (actionId && (/^[\-]|[\x00-\x1f\x7f/:]/.test(actionId) || actionId.length > 256)) return null;
     var desktop = entry.id + ".desktop";
     if (actionId) {
         var actions = entry.actions || [];
@@ -31,11 +31,11 @@ function command(entry, actionId) {
 // Group launch runs installed apps and saved commands in pinned order.
 function groupEntries(pins, applications, groupId) {
     if (!groupId) return [];
-    var seen = {};
+    var seen = Object.create(null);
     return pins.filter(function(pin) { return pin.folderId === groupId; })
         .map(function(pin) { return (pin.kind === "command" || pin.kind === "location") ? pin : applications.find(function(app) { return app.id === pin.id; }); })
         .filter(function(app) {
-            if (!app || seen[app.id] || !command(app, "")) return false;
+            if (!app || seen[app.id] || !(app.kind === "command" ? String(app.commandText || "").trim() : command(app, ""))) return false;
             seen[app.id] = true;
             return true;
         });

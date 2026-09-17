@@ -8,8 +8,8 @@ MenuItem {
     leftPadding: Style.space(12)
     rightPadding: Style.space(12)
     contentItem: Text {
-        text: root.text
         textFormat: Text.PlainText
+        text: root.text
         color: Color.foreground
         opacity: root.enabled ? 1 : 0.45
         font.family: Style.font.family

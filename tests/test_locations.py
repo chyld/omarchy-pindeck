@@ -3,9 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-spec = importlib.util.spec_from_file_location('locations', Path(__file__).resolve().parents[1] / 'bin/locations.py')
-locations = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(locations)
+from backend import locations
 
 class LocationsTest(unittest.TestCase):
     def test_special_characters_are_encoded_as_file_uri(self):

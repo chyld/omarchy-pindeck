@@ -51,7 +51,7 @@ omarchy plugin add https://github.com/chyld/omarchy-pindeck.git --enable
 
 Click the four-tile icon in your bar, add your first few items, and make a group when you are ready.
 
-PinDeck requires Omarchy Quattro, Python 3, PyGObject (`python-gobject`), GTK 4, Bash, `uwsm-app`, `gtk-launch`, `xdg-terminal-exec`, `xdg-open`, and `notify-send`. Programs used in your saved commands must be installed separately.
+PinDeck requires Omarchy Quattro, Python 3, PyGObject (`python-gobject`), GTK 4, GdkPixbuf, Bash, `uwsm-app`, `gtk-launch`, `xdg-terminal-exec`, `xdg-open`, and `notify-send`. Programs used in your saved commands must be installed separately.
 
 ## Keyboard controls
 
@@ -89,13 +89,13 @@ Existing `pinned.json` data is imported when `pindeck.json` does not yet exist. 
 
 ## What it does to your system
 
-PinDeck runs inside the Omarchy shell. It reads installed desktop entries and saves its configuration with atomic writes. It creates the config on first use, importing older settings when available. Opening the panel does not launch your pins; you choose when an item or group runs.
+PinDeck runs inside the Omarchy shell. It reads installed desktop entries and saves its configuration through a supervised Python helper with bounded reads and atomic writes. It creates the config on first use, importing older settings when available. Opening the panel does not launch your pins; you choose when an item or group runs.
 
 - **App launches** use `uwsm-app` and `gtk-launch`; terminal launches use `xdg-terminal-exec`.
 - **Folder shortcuts** use a native chooser and open through `xdg-open`. An unavailable folder reports an error without stopping the remaining group launches.
 - **Focus** follows a matching launched window, with the pointer moved to its center. Group launches track the final app or folder manager.
 - **Network and credentials:** PinDeck fetches no remote data and has no credential store. Saved commands are plain text. The apps and commands you launch run with your user permissions and may access files, credentials, or the network as those programs normally do.
-- **Configuration:** PinDeck writes `~/.config/omarchy/pindeck.json`; it does not install dependencies or add startup commands.
+- **Configuration:** PinDeck writes `~/.config/omarchy/pindeck.json` and a private `.pindeck.lock` alongside it. New configuration writes use mode `0600`; compatible older `0644` files become private on the next save. It does not install dependencies or add startup commands.
 
 ## Remove
 
@@ -103,17 +103,21 @@ PinDeck runs inside the Omarchy shell. It reads installed desktop entries and sa
 omarchy plugin remove chyld.pindeck
 ```
 
-Your `pindeck.json` remains for a future reinstall. Apps and commands already launched continue running.
+Your `pindeck.json`, any legacy `pinned.json`, and `.pindeck.lock` remain for a future reinstall. Temporary helpers and the configuration watcher stop with the plugin. Apps and commands already launched continue running.
 
 ## Development
 
-The root `manifest.json` and QML files are the plugin. `bin/locations.py` handles directory selection and validation. JavaScript modules contain the search, organization, launch, and config logic; tests exercise those shipped modules directly.
+The root `manifest.json`, `BarWidget.qml`, and `Service.qml` are the plugin entry points. The shared service coordinates configuration across monitors. `ui/` contains views, `controllers/` contains interaction and launch coordination, `domain/` contains pure JavaScript logic, and `backend/` contains bounded filesystem and helper operations.
 
 ```sh
-node --test tests/*.test.cjs
-python3 -m unittest discover -s tests -p 'test_*.py'
-omarchy plugin validate .
+python3 scripts/test.py
+python3 scripts/test_mutations.py
+python3 scripts/test_coverage.py
+# On an Omarchy desktop, using an isolated configuration:
+python3 scripts/test_runtime.py
 ```
+
+Qt 6 QML Test, Quick, and Controls modules are needed for component tests. See [testing](docs/TESTING.md) and [security boundaries](docs/SECURITY.md).
 
 Desktop checks should also cover loading, keyboard and pointer interactions, launches, config edits, shell reloads, and multiple monitors. Portable tests alone do not verify those behaviors.
 

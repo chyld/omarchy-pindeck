@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {choose,center}=require('../Focus.js');
+const {choose,center}=require('../domain/Focus.js');
 const term={id:'cliamp',name:'cliamp',terminal:true};
 const gui={id:'org.gnome.Nautilus',name:'Files',startupClass:'org.gnome.Nautilus'};
 const old={address:'0x1',class:'foot',mapped:true};

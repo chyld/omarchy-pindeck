@@ -16,11 +16,13 @@ ToolTip {
     }
     contentItem: Text {
         id: label
-        text: root.text
         textFormat: Text.PlainText
+        text: String(root.text).slice(0, 2048)
         color: Color.foreground
         font.family: Style.font.family
         font.pixelSize: Style.font.bodySmall
         wrapMode: Text.WrapAnywhere
+        maximumLineCount: 8
+        elide: Text.ElideRight
     }
 }

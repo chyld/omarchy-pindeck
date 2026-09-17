@@ -1,6 +1,6 @@
 const {test} = require('node:test');
 const assert = require('node:assert/strict');
-const {score, search} = require('../Search.js');
+const {score, search} = require('../domain/Search.js');
 const apps = [
   {id:'firefox',name:'Firefox'},
   {id:'org.code',name:'Visual Studio Code'},
@@ -24,7 +24,7 @@ test('finder returns intended match and handles no results', () => {
   assert.deepEqual(search(apps,'zzzz'),[]);
 });
 test('Omarchy exclusions and desktop visibility both filter search results', () => {
-  const {hiddenIds} = require('../Search.js');
+  const {hiddenIds} = require('../domain/Search.js');
   const configured = hiddenIds('firefox.desktop\r\n\n');
   const desktop = hiddenIds('org.code\n');
   assert.deepEqual(search(apps, '', configured, desktop).map(e => e.id), ['cli']);
